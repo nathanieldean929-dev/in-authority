@@ -1,0 +1,13 @@
+{
+  "name": "in-authority",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "preview": "wrangler dev --remote"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}

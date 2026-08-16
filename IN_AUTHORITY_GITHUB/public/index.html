@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#172b3f">
+  <meta name="description" content="A daily prayer guide for people serving in public office.">
+  <meta name="application-name" content="IN AUTHORITY">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <title>IN AUTHORITY</title>
+  <style>
+    :root{
+      --navy:#172b3f; --gold:#b79a5a; --cream:#f7f4ec; --white:#fff;
+      --ink:#26313a; --muted:#6c747b; --line:#ded9ce; --green:#58715f;
+      --danger:#8c4b4b; --shadow:0 10px 30px rgba(23,43,63,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:#d9d9d9}
+    body{font-family:Georgia,"Times New Roman",serif;color:var(--ink)}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:430px;min-height:100vh;margin:0 auto;background:var(--cream);position:relative;padding-bottom:84px}
+    header{height:62px;padding:18px 21px 10px;display:flex;justify-content:space-between;align-items:center;color:var(--navy);border-bottom:1px solid rgba(222,217,206,.55)}
+    .logo{font:700 16px Arial,sans-serif;letter-spacing:3px}
+    .version{font:11px Arial,sans-serif;color:var(--muted)}
+    .status{font:10px Arial,sans-serif;display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:#eee9dd;color:var(--muted)}
+    .status.dot-live:before{content:"";width:6px;height:6px;background:var(--green);border-radius:50%}
+    .status.dot-cache:before{content:"";width:6px;height:6px;background:var(--gold);border-radius:50%}
+    .status.dot-error:before{content:"";width:6px;height:6px;background:var(--danger);border-radius:50%}
+    .screen{display:none;padding:22px}
+    .screen.active{display:block}
+    .center{text-align:center}
+    .hero{padding-top:46px}
+    .eyebrow{font:700 11px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+    h1{font-size:31px;line-height:1.08;color:var(--navy);margin:12px 0 15px}
+    h2{font-size:21px;color:var(--navy);margin:24px 0 10px}
+    h3{font-size:16px;color:var(--navy);margin:0 0 6px}
+    p{font-size:15px;line-height:1.55;margin:8px 0}
+    small,.meta{font:12px Arial,sans-serif;color:var(--muted);line-height:1.5}
+    .quote{border-left:3px solid var(--gold);padding:10px 14px;margin:20px 0;font-size:17px;line-height:1.5;text-align:left}
+    .button{width:100%;padding:15px 14px;border-radius:8px;margin:9px 0;font:700 13px Arial,sans-serif;letter-spacing:.5px}
+    .primary{background:var(--navy);color:white;border:1px solid var(--navy)}
+    .secondary{background:transparent;color:var(--navy);border:1px solid var(--navy)}
+    .quiet{background:transparent;color:var(--muted);border:1px solid var(--line)}
+    .button:disabled{opacity:.55;cursor:not-allowed}
+    .card{background:var(--white);border:1px solid var(--line);border-radius:12px;padding:15px;margin:11px 0;box-shadow:0 2px 10px rgba(23,43,63,.025)}
+    .member-button{width:100%;border:0;background:none;text-align:left;padding:0}
+    .avatar{width:55px;height:55px;border-radius:50%;background:#ded9ce;display:flex;align-items:center;justify-content:center;float:left;margin-right:12px;font:700 15px Arial,sans-serif;color:var(--navy)}
+    .name{font-size:18px;font-weight:bold;color:var(--navy);padding-top:2px;padding-right:55px}
+    .badge{float:right;font:700 9px Arial,sans-serif;color:var(--navy);background:#eee9dd;border-radius:20px;padding:5px 7px}
+    .clear{clear:both}
+    .section-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+    .progress{height:7px;background:#e2ddd3;border-radius:99px;overflow:hidden;margin:10px 0 7px}
+    .progress > span{display:block;height:100%;width:0;background:var(--gold);transition:width .25s ease}
+    .map{border:1px solid var(--line);border-radius:10px;background:linear-gradient(135deg,#e9e4d9,#d9e0db);padding:14px;color:var(--muted)}
+    .prompt{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:13px;margin:9px 0}
+    .prompt strong{color:var(--navy)}
+    hr{border:0;border-top:1px solid var(--line);margin:21px 0}
+    .bottom-nav{position:fixed;left:0;right:0;bottom:0;max-width:430px;margin:auto;background:var(--white);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px calc(10px + env(safe-area-inset-bottom));z-index:20}
+    .nav-button{border:0;background:none;color:var(--muted);font:10px Arial,sans-serif}
+    .nav-button.active{color:var(--navy);font-weight:bold}
+    .nav-icon{display:block;font-size:18px;margin-bottom:2px}
+    .cross{font-size:38px;color:var(--gold);margin-bottom:18px}
+    .notice{background:#eee9dd;border-radius:10px;padding:12px;font:11px Arial,sans-serif;color:var(--muted);margin-top:15px}
+    .loading{padding:28px 6px;text-align:center;color:var(--muted);font:12px Arial,sans-serif}
+    .error{background:#f2e8e5;color:var(--danger);border:1px solid #e2c9c2;border-radius:10px;padding:12px;font:12px Arial,sans-serif}
+    .success{background:#e6eee8;color:#365542;border:1px solid #c9ddce;border-radius:10px;padding:12px;font:12px Arial,sans-serif}
+    .field{margin:13px 0}
+    .field label{display:block;font:700 11px Arial,sans-serif;letter-spacing:1px;color:var(--navy);margin-bottom:6px}
+    .field input{width:100%;padding:13px 12px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--ink)}
+    .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .stat{background:var(--white);border:1px solid var(--line);border-radius:10px;padding:13px}
+    .stat strong{display:block;font:700 22px Arial,sans-serif;color:var(--navy)}
+    .stat span{font:11px Arial,sans-serif;color:var(--muted)}
+    .source{font:10px Arial,sans-serif;color:var(--muted);line-height:1.4}
+    a{color:var(--navy)}
+    .link-button{display:inline-block;padding:10px 0;color:var(--navy);font:700 12px Arial,sans-serif;text-decoration:underline;background:none;border:0}
+    .chip-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+    .chip{background:#eee9dd;border-radius:999px;padding:6px 8px;font:10px Arial,sans-serif;color:var(--navy)}
+    .footer-note{font:10px Arial,sans-serif;color:var(--muted);line-height:1.5;text-align:center;margin:22px 0}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">IN AUTHORITY</div>
+    <div id="header-status" class="status dot-live">Loading</div>
+  </header>
+
+  <section id="screen-welcome" class="screen active center hero">
+    <div class="cross">✦</div>
+    <div class="eyebrow">A Daily Prayer Guide</div>
+    <h1>Pray for those whom God has placed in authority over us.</h1>
+    <div class="quote">“For kings, and for all that are in authority...”<br><small>1 Timothy 2:2 KJV</small></div>
+    <p>Each day, pray for four members of the U.S. House and two U.S. Senators—and for the people they represent.</p>
+    <button type="button" class="button primary" id="begin-button">BEGIN TODAY'S PRAYER</button>
+    <button type="button" class="button secondary" id="welcome-location-button">FIND MY REPRESENTATIVES</button>
+    <div id="welcome-data-note" class="notice">Preparing current congressional data…</div>
+  </section>
+
+  <section id="screen-today" class="screen">
+    <div class="eyebrow">Today's Prayer</div>
+    <h1>The Daily Six</h1>
+    <p id="rotation-note">Six people in authority. Take a few minutes to pray for each one.</p>
+    <div class="progress"><span id="today-progress"></span></div>
+    <div class="meta" id="today-count">Loading…</div>
+    <div class="section-head"><h2>U.S. House</h2><span class="meta">4 Representatives</span></div>
+    <div id="house-list"><div class="loading">Loading current Representatives…</div></div>
+    <div class="section-head"><h2>U.S. Senate</h2><span class="meta">2 Senators</span></div>
+    <div id="senate-list"><div class="loading">Loading current Senators…</div></div>
+    <div class="footer-note" id="data-source-note"></div>
+  </section>
+
+  <section id="screen-member" class="screen">
+    <button type="button" class="button secondary" id="back-button">← BACK TO TODAY</button>
+    <div id="member-content"></div>
+  </section>
+
+  <section id="screen-complete" class="screen center">
+    <div style="font-size:46px;color:var(--gold);margin-top:45px">🙏</div>
+    <div class="eyebrow">Today Complete</div>
+    <h1>You Prayed for All Six</h1>
+    <p>You've prayed for four Representatives, two Senators, and the people they represent.</p>
+    <div class="quote">“...that we may lead a quiet and peaceable life in all godliness and honesty.”<br><small>1 Timothy 2:2 KJV</small></div>
+    <button type="button" class="button primary" id="view-history-button">VIEW PRAYER JOURNEY</button>
+    <button type="button" class="button secondary" id="review-button">REVIEW TODAY'S SIX</button>
+  </section>
+
+  <section id="screen-history" class="screen">
+    <div class="eyebrow">Your Prayer Journey</div>
+    <h1>History</h1>
+    <div class="stat-grid">
+      <div class="stat"><strong id="history-today">0</strong><span>prayed today</span></div>
+      <div class="stat"><strong id="history-lifetime">0</strong><span>prayer records</span></div>
+    </div>
+    <hr>
+    <h2>Congress Coverage</h2>
+    <p class="meta">Coverage is calculated from your saved prayer records and current member list.</p>
+    <div class="meta">House</div><div class="progress"><span id="house-progress"></span></div>
+    <div class="meta" style="margin-top:14px">Senate</div><div class="progress"><span id="senate-progress"></span></div>
+    <div class="meta" style="margin-top:14px">Overall</div><div class="progress"><span id="overall-progress"></span></div>
+    <p class="meta" id="coverage-text"></p>
+    <button type="button" class="button quiet" id="clear-history-button">CLEAR LOCAL PRAYER HISTORY</button>
+  </section>
+
+  <section id="screen-congress" class="screen">
+    <div class="eyebrow">Congress</div>
+    <h1>Everyone in Authority</h1>
+    <p>Browse the current U.S. House and Senate roster used by the daily rotation.</p>
+    <div class="card"><strong>Current roster</strong><p class="meta" id="roster-count">Loading…</p></div>
+    <div class="field"><label for="member-search">SEARCH CONGRESS</label><input id="member-search" type="search" placeholder="Name, state, district, or party"></div>
+    <div class="field"><label for="state-filter">FILTER BY STATE</label><select id="state-filter" style="width:100%;padding:13px 12px;border:1px solid var(--line);border-radius:8px;background:var(--white);color:var(--ink)"><option value="">All states</option></select></div>
+    <div id="congress-list"><div class="loading">Loading current members…</div></div>
+  </section>
+
+  <section id="screen-location" class="screen">
+    <div class="eyebrow">My Representatives</div>
+    <h1>Find Your Delegation</h1>
+    <p>Enter a U.S. ZIP code. Some ZIP codes overlap multiple House districts; when that happens, use the official House lookup for an exact address match.</p>
+    <div class="field"><label for="zip-input">ZIP CODE</label><input id="zip-input" inputmode="numeric" autocomplete="postal-code" maxlength="5" placeholder="e.g. 20500"></div>
+    <button type="button" class="button primary" id="zip-button">FIND MY REPRESENTATIVES</button>
+    <div id="zip-result"></div>
+    <div class="notice">Location is optional. IN AUTHORITY stores your ZIP locally on this device only.</div>
+    <p class="source">Representative lookup: IN AUTHORITY server-side proxy to RepsContact, with an official House.gov fallback. Current roster: maintained congressional member data.</p>
+    <a class="link-button" href="https://www.house.gov/representatives/find-your-representative" target="_blank" rel="noopener">Open official House.gov lookup ↗</a>
+  </section>
+
+  <section id="screen-settings" class="screen">
+    <div class="eyebrow">About</div>
+    <h1>IN AUTHORITY</h1>
+    <p>A simple daily practice of praying for people serving in public office.</p>
+    <h2>Data & Privacy</h2>
+    <p class="meta">The current congressional roster is requested from a public congressional data repository and cached locally for reliability. Your prayer history and optional ZIP code stay in this browser's local storage. There is no account or server-side prayer-history database in this release candidate.</p>
+    <h2>Sources</h2>
+    <p class="meta">Congressional roster: <a href="https://github.com/unitedstates/congress-legislators" target="_blank" rel="noopener">unitedstates/congress-legislators</a>.<br>Official House delegation lookup: <a href="https://www.house.gov/representatives/find-your-representative" target="_blank" rel="noopener">house.gov</a>.</p>
+    <h2>Release note</h2>
+    <p class="meta">This build is designed to be deployable as a static HTTPS site. For a larger launch, add a small backend cache/proxy, centralized analytics/monitoring, and a production privacy/legal review.</p>
+    <button type="button" class="button secondary" id="refresh-data-button">REFRESH CONGRESSIONAL DATA</button>
+  </section>
+
+  <nav class="bottom-nav" aria-label="Primary">
+    <button type="button" class="nav-button active" data-target="screen-today"><span class="nav-icon">🙏</span>Today</button>
+    <button type="button" class="nav-button" data-target="screen-history"><span class="nav-icon">📖</span>History</button>
+    <button type="button" class="nav-button" data-target="screen-congress"><span class="nav-icon">🇺🇸</span>Congress</button>
+    <button type="button" class="nav-button" data-target="screen-location"><span class="nav-icon">📍</span>My Reps</button>
+    <button type="button" class="nav-button" data-target="screen-settings"><span class="nav-icon">ℹ️</span>About</button>
+  </nav>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  const CONFIG = {
+    rosterUrls: ["/api/members"],
+    lookupUrl: "/api/reps?zip=",
+    cacheKey: "inAuthorityRosterV3",
+    prayerKey: "inAuthorityPrayerHistoryV2",
+    zipKey: "inAuthorityZipV1",
+    rotationEpoch: "2026-01-03"
+  };
+
+  const state = {
+    members: [],
+    currentSix: [],
+    status: "loading",
+    dataSource: null
+  };
+
+  const $ = id => document.getElementById(id);
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function todayKey() {
+    const d = new Date();
+    const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, "0"), day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+
+  function dayNumber(dateString) {
+    const start = new Date(CONFIG.rotationEpoch + "T00:00:00");
+    const current = new Date(dateString + "T00:00:00");
+    return Math.max(0, Math.floor((current - start) / 86400000));
+  }
+
+  function getHistory() {
+    try { return JSON.parse(localStorage.getItem(CONFIG.prayerKey) || "{}"); }
+    catch { return {}; }
+  }
+
+  function setHistory(history) {
+    localStorage.setItem(CONFIG.prayerKey, JSON.stringify(history));
+  }
+
+  function prayedSetForToday() {
+    return new Set(getHistory()[todayKey()] || []);
+  }
+
+  function initials(name) {
+    return String(name).split(/\s+/).filter(Boolean).map(x => x[0]).slice(0,2).join("").toUpperCase();
+  }
+
+  function chamberLabel(member) {
+    return member.chamber === "senate" ? "U.S. Senate" : "U.S. House";
+  }
+
+  function formatDistrict(member) {
+    if (member.chamber === "senate") return member.state;
+    if (member.district === "0") return `${member.state} at large`;
+    return `${member.state} District ${member.district}`;
+  }
+
+  function officialUrl(member) {
+    return member.url || `https://bioguide.congress.gov/search/bio/${encodeURIComponent(member.bioguide)}`;
+  }
+
+  function setStatus(type, text) {
+    const el = $("header-status");
+    el.className = "status " + (type === "live" ? "dot-live" : type === "cache" ? "dot-cache" : "dot-error");
+    el.textContent = text;
+    state.status = type;
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+    const target = $(id);
+    if (target) target.classList.add("active");
+    document.querySelectorAll(".nav-button").forEach(b => b.classList.toggle("active", b.dataset.target === id));
+    if (id === "screen-today") renderToday();
+    if (id === "screen-history") renderHistory();
+    if (id === "screen-congress") renderCongress();
+    window.scrollTo({top:0, behavior:"instant"});
+  }
+
+  function normalizeMember(row) {
+    const id = row.id || {};
+    const name = row.name || {};
+    const currentTerm = Array.isArray(row.terms) ? row.terms[row.terms.length - 1] : {};
+    const chamber = currentTerm.type === "sen" ? "senate" : currentTerm.type === "rep" ? "house" : null;
+    if (!chamber || !id.bioguide) return null;
+    return {
+      bioguide: id.bioguide,
+      name: [name.first, name.middle, name.last, name.suffix].filter(Boolean).join(" "),
+      first: name.first || "",
+      last: name.last || "",
+      state: currentTerm.state || "",
+      district: currentTerm.district != null ? String(currentTerm.district) : "",
+      party: currentTerm.party || "",
+      chamber,
+      start: currentTerm.start || "",
+      end: currentTerm.end || "",
+      url: currentTerm.url || "",
+      class: currentTerm.class || ""
+    };
+  }
+
+  async function fetchRoster(force = false) {
+    const cached = (() => { try { return JSON.parse(localStorage.getItem(CONFIG.cacheKey) || "null"); } catch { return null; } })();
+    if (!force && cached && cached.savedAt && Date.now() - cached.savedAt < 86400000 && Array.isArray(cached.members)) {
+      state.members = cached.members;
+      populateStateFilter();
+      state.dataSource = "cache";
+      setStatus("cache", "Cached roster");
+      $("welcome-data-note").textContent = `Current roster cached ${new Date(cached.savedAt).toLocaleDateString()}.`;
+      return;
+    }
+    let lastError = null;
+    for (const rosterUrl of CONFIG.rosterUrls) {
+      try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 12000);
+        const response = await fetch(rosterUrl, {signal: controller.signal, cache: "no-store"});
+        clearTimeout(timer);
+        if (!response.ok) throw new Error(`Roster request failed (${response.status})`);
+        const json = await response.json();
+        const members = json.map(normalizeMember).filter(Boolean);
+        if (members.length < 400) throw new Error("Roster response was unexpectedly incomplete.");
+        members.sort((a,b) => (a.chamber+a.state+a.name).localeCompare(b.chamber+b.state+b.name));
+        state.members = members;
+        state.dataSource = "live";
+        localStorage.setItem(CONFIG.cacheKey, JSON.stringify({savedAt: Date.now(), members}));
+        setStatus("live", "Live roster");
+        $("welcome-data-note").textContent = `Live congressional roster loaded: ${members.length} current members.`;
+        populateStateFilter();
+        return;
+      } catch (err) { lastError = err; }
+    }
+    if (cached && Array.isArray(cached.members) && cached.members.length >= 400) {
+      state.members = cached.members;
+      populateStateFilter();
+      state.dataSource = "cache";
+      setStatus("cache", "Cached roster");
+      $("welcome-data-note").textContent = "Live refresh was unavailable, so the last saved congressional roster is being used.";
+      populateStateFilter();
+    } else {
+      setStatus("error", "Data unavailable");
+      $("welcome-data-note").innerHTML = `<div class="error">Congressional data could not be loaded. Check your connection and use “Refresh congressional data” from About.</div>`;
+    }
+  }
+
+  function selectDailySix() {
+    const house = state.members.filter(m => m.chamber === "house");
+    const senate = state.members.filter(m => m.chamber === "senate");
+    const day = dayNumber(todayKey());
+    if (!house.length || !senate.length) return [];
+    const houseStart = (day * 4) % house.length;
+    const senateStart = (day * 2) % senate.length;
+    const pickedHouse = Array.from({length: Math.min(4, house.length)}, (_, i) => house[(houseStart + i) % house.length]);
+    const pickedSenate = Array.from({length: Math.min(2, senate.length)}, (_, i) => senate[(senateStart + i) % senate.length]);
+    state.currentSix = [...pickedHouse, ...pickedSenate];
+    return state.currentSix;
+  }
+
+  function memberCard(member) {
+    const prayed = prayedSetForToday().has(member.bioguide);
+    return `
+      <div class="card">
+        <button type="button" class="member-button" data-member-id="${escapeHtml(member.bioguide)}" aria-label="View ${escapeHtml(member.name)}">
+          <span class="badge">${prayed ? "✓ PRAYED" : "VIEW →"}</span>
+          <div class="avatar" aria-hidden="true">${escapeHtml(initials(member.name))}</div>
+          <div class="name">${escapeHtml(member.chamber === "senate" ? "Sen." : "Rep.")} ${escapeHtml(member.name)}</div>
+          <div class="meta">${escapeHtml(formatDistrict(member))}<br>${escapeHtml(member.party)}</div>
+          <div class="clear"></div>
+        </button>
+      </div>`;
+  }
+
+  function renderToday() {
+    if (!state.members.length) return;
+    const six = selectDailySix();
+    const prayed = prayedSetForToday();
+    $("house-list").innerHTML = six.filter(m=>m.chamber==="house").map(memberCard).join("");
+    $("senate-list").innerHTML = six.filter(m=>m.chamber==="senate").map(memberCard).join("");
+    const count = six.filter(m => prayed.has(m.bioguide)).length;
+    $("today-count").textContent = `${count} of 6 prayed for`;
+    $("today-progress").style.width = `${count / 6 * 100}%`;
+    const cycleDays = Math.ceil(state.members.filter(m=>m.chamber==="house").length / 4);
+    $("rotation-note").textContent = `A simple rotating cycle assigns four Representatives and two Senators each day. House coverage completes in about ${cycleDays} days.`;
+    $("data-source-note").textContent = state.dataSource === "live"
+      ? "Current-member data: cached through the IN AUTHORITY Cloudflare Worker."
+      : "Using your last cached congressional roster. Refresh from About when online.";
+    document.querySelectorAll("[data-member-id]").forEach(btn => btn.addEventListener("click", () => openMember(btn.dataset.memberId)));
+  }
+
+  function promptsFor(member) {
+    const place = member.chamber === "senate" ? `the people of ${member.state}` : `${member.state}${member.district === "0" ? "" : " and the communities of District " + member.district}`;
+    return [
+      ["Wisdom", `Pray that ${member.name} would have wisdom as decisions are made affecting ${place}.`],
+      ["Integrity", `Pray that ${member.name} would act with honesty and integrity, including when doing so is difficult.`],
+      ["Justice", `Pray that ${member.name} would pursue what is right and just in the responsibilities entrusted to them.`],
+      ["Constituents", `Pray for the families, communities, churches, businesses, and individuals throughout ${place}.`],
+      ["Responsibilities", `Pray for wisdom in the responsibilities connected to ${member.name}'s work in Congress.`],
+      ["Family", `Pray for ${member.name}'s family and for strength amid the demands of public office.`]
+    ];
+  }
+
+  function openMember(id) {
+    const member = state.members.find(m => m.bioguide === id);
+    if (!member) return;
+    const prayed = prayedSetForToday().has(member.bioguide);
+    const promptHTML = promptsFor(member).map(([title, body]) =>
+      `<div class="prompt"><strong>🙏 ${escapeHtml(title)}</strong><p>${escapeHtml(body)}</p></div>`
+    ).join("");
+
+    $("member-content").innerHTML = `
+      <div class="eyebrow">${escapeHtml(chamberLabel(member))}</div>
+      <h1>${escapeHtml(member.chamber === "senate" ? "Sen." : "Rep.")} ${escapeHtml(member.name)}</h1>
+      <div class="chip-row"><span class="chip">${escapeHtml(member.party)}</span><span class="chip">${escapeHtml(formatDistrict(member))}</span></div>
+      <hr>
+      <h2>Where They Represent</h2>
+      <div class="map">
+        <strong>${escapeHtml(formatDistrict(member))}</strong>
+        <p class="meta">Congressional district information from the current roster.</p>
+        <a class="link-button" href="https://www.openstreetmap.org/search?query=${encodeURIComponent(formatDistrict(member))}" target="_blank" rel="noopener">View area on OpenStreetMap ↗</a>
+      </div>
+      <h2>Their Role</h2>
+      <p>${escapeHtml(member.chamber === "senate" ? "U.S. Senator representing the state of " + member.state : "U.S. Representative serving " + formatDistrict(member))}.</p>
+      <h2>Pray For</h2>
+      ${promptHTML}
+      <button type="button" class="button primary" id="pray-button">${prayed ? "✓ PRAYED FOR TODAY" : "I PRAYED FOR THEM"}</button>
+      <a class="link-button" href="${escapeHtml(officialUrl(member))}" target="_blank" rel="noopener">Open official member profile ↗</a>
+      <p class="source">Bioguide ID: ${escapeHtml(member.bioguide)}</p>
+    `;
+    $("pray-button").addEventListener("click", () => markPrayed(member.bioguide));
+    showScreen("screen-member");
+  }
+
+  function markPrayed(id) {
+    const history = getHistory();
+    const key = todayKey();
+    const list = new Set(history[key] || []);
+    list.add(id);
+    history[key] = [...list];
+    setHistory(history);
+    renderToday();
+    renderHistory();
+    const next = state.currentSix.find(m => !list.has(m.bioguide));
+    if (next) openMember(next.bioguide);
+    else showScreen("screen-complete");
+  }
+
+  function renderHistory() {
+    if (!state.members.length) return;
+    const history = getHistory();
+    const today = new Set(history[todayKey()] || []);
+    const allIds = new Set(Object.values(history).flat());
+    const houseIds = new Set(state.members.filter(m=>m.chamber==="house").map(m=>m.bioguide));
+    const senateIds = new Set(state.members.filter(m=>m.chamber==="senate").map(m=>m.bioguide));
+    const houseCovered = [...allIds].filter(id => houseIds.has(id)).length;
+    const senateCovered = [...allIds].filter(id => senateIds.has(id)).length;
+    const lifetime = Object.values(history).reduce((sum, ids) => sum + ids.length, 0);
+    $("history-today").textContent = today.size;
+    $("history-lifetime").textContent = lifetime;
+    $("house-progress").style.width = `${Math.min(100, houseCovered / Math.max(1, houseIds.size) * 100)}%`;
+    $("senate-progress").style.width = `${Math.min(100, senateCovered / Math.max(1, senateIds.size) * 100)}%`;
+    $("overall-progress").style.width = `${Math.min(100, allIds.size / Math.max(1, state.members.length) * 100)}%`;
+    $("coverage-text").textContent = `You have prayed for ${houseCovered} current House members and ${senateCovered} current Senators at least once on this device.`;
+  }
+
+  const STATE_NAMES = {
+    AL:"Alabama", AK:"Alaska", AZ:"Arizona", AR:"Arkansas", CA:"California", CO:"Colorado", CT:"Connecticut", DE:"Delaware", FL:"Florida", GA:"Georgia", HI:"Hawaii", ID:"Idaho", IL:"Illinois", IN:"Indiana", IA:"Iowa", KS:"Kansas", KY:"Kentucky", LA:"Louisiana", ME:"Maine", MD:"Maryland", MA:"Massachusetts", MI:"Michigan", MN:"Minnesota", MS:"Mississippi", MO:"Missouri", MT:"Montana", NE:"Nebraska", NV:"Nevada", NH:"New Hampshire", NJ:"New Jersey", NM:"New Mexico", NY:"New York", NC:"North Carolina", ND:"North Dakota", OH:"Ohio", OK:"Oklahoma", OR:"Oregon", PA:"Pennsylvania", RI:"Rhode Island", SC:"South Carolina", SD:"South Dakota", TN:"Tennessee", TX:"Texas", UT:"Utah", VT:"Vermont", VA:"Virginia", WA:"Washington", WV:"West Virginia", WI:"Wisconsin", WY:"Wyoming", DC:"District of Columbia", AS:"American Samoa", GU:"Guam", MP:"Northern Mariana Islands", PR:"Puerto Rico", VI:"U.S. Virgin Islands"
+  };
+
+  function populateStateFilter() {
+    const select = $("state-filter");
+    if (!select) return;
+    const states = [...new Set(state.members.map(m=>m.state).filter(Boolean))].sort((a,b)=>(STATE_NAMES[a]||a).localeCompare(STATE_NAMES[b]||b));
+    const existing = select.value;
+    select.innerHTML = `<option value="">All states</option>` + states.map(code => `<option value="${escapeHtml(code)}">${escapeHtml(STATE_NAMES[code] || code)}</option>`).join("");
+    select.value = states.includes(existing) ? existing : "";
+  }
+
+  function renderCongress() {
+    if (!state.members.length) return;
+    $("roster-count").textContent = `${state.members.length} current members (${state.members.filter(m=>m.chamber==="house").length} House, ${state.members.filter(m=>m.chamber==="senate").length} Senate).`;
+    const query = $("member-search").value.trim().toLowerCase();
+    const selectedState = $("state-filter")?.value || "";
+    const filtered = state.members.filter(m => {
+      const haystack = [m.name,m.state,STATE_NAMES[m.state] || "",m.district,m.party,m.chamber, m.chamber === "senate" ? "senator" : "representative"].join(" ").toLowerCase();
+      return (!query || haystack.includes(query)) && (!selectedState || m.state === selectedState);
+    });
+    filtered.sort((a,b) => (a.chamber+a.state+a.name).localeCompare(b.chamber+b.state+b.name));
+    const visible = filtered.slice(0, 200);
+    $("congress-list").innerHTML = visible.map(m => `
+      <div class="card">
+        <button type="button" class="member-button" data-congress-id="${escapeHtml(m.bioguide)}">
+          <span class="name">${escapeHtml(m.chamber === "senate" ? "Sen." : "Rep.")} ${escapeHtml(m.name)}</span>
+          <div class="meta">${escapeHtml(formatDistrict(m))} • ${escapeHtml(m.party)}</div>
+        </button>
+      </div>`).join("") || `<div class="notice">No members match that search.</div>`;
+    document.querySelectorAll("[data-congress-id]").forEach(btn => btn.addEventListener("click", () => openMember(btn.dataset.congressId)));
+  }
+
+  function extractRepresentativeRecords(json) {
+    const out = [];
+    const seen = new Set();
+    function walk(node, depth=0) {
+      if (!node || depth > 6) return;
+      if (Array.isArray(node)) { node.forEach(x=>walk(x, depth+1)); return; }
+      if (typeof node !== "object") return;
+      const chamberRaw = node.chamber ?? node.house_or_senate ?? node.office ?? node.type ?? node.role ?? "";
+      const name = node.name || node.display_name || node.full_name || node.person?.name || node.member?.name;
+      if (name && chamberRaw) {
+        const chamber = String(chamberRaw).toLowerCase();
+        if (/(house|representative|rep\b|senate|senator|sen\b)/.test(chamber)) {
+          const key = `${name}|${chamber}|${node.state || ""}|${node.district || ""}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            out.push({
+              name: String(name),
+              chamber,
+              party: node.party || node.political_party || node.affiliation || "",
+              state: node.state || node.state_code || node.state_abbreviation || "",
+              district: node.district || node.district_number || "",
+              phone: node.phone || node.phone_number || node.contact?.phone || "",
+              website: node.website || node.url || node.official_website || node.contact?.website || ""
+            });
+          }
+        }
+      }
+      Object.values(node).forEach(v=>walk(v, depth+1));
+    }
+    walk(json);
+    return out;
+  }
+
+  function renderZipWidget(zip, message) {
+    const safeZip = encodeURIComponent(zip);
+    $("zip-result").innerHTML = `
+      <div class="success">${escapeHtml(message)}</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <iframe title="Find your representatives" src="https://repscontact.com/embed/widget?zip=${safeZip}" style="width:100%;height:620px;border:0" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      </div>
+      <div class="notice">RepsContact says ambiguous ZIP codes may require an address to identify the exact House district. Use the official House.gov lookup when needed.</div>`;
+  }
+
+  async function lookupZip() {
+    const zip = $("zip-input").value.trim();
+    if (!/^\d{5}$/.test(zip)) {
+      $("zip-result").innerHTML = `<div class="error">Enter a valid 5-digit U.S. ZIP code.</div>`;
+      return;
+    }
+    localStorage.setItem(CONFIG.zipKey, zip);
+    $("zip-button").disabled = true;
+    $("zip-result").innerHTML = `<div class="loading">Looking up your delegation…</div>`;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000);
+      const response = await fetch(CONFIG.lookupUrl + encodeURIComponent(zip), {headers:{Accept:"application/json"}, cache:"no-store", signal:controller.signal});
+      clearTimeout(timer);
+      if (!response.ok) throw new Error(`Lookup failed (${response.status})`);
+      const json = await response.json();
+      const reps = extractRepresentativeRecords(json);
+      if (!reps.length) throw new Error("The lookup returned no displayable representatives.");
+      const house = reps.filter(r => /house|representative|rep\b/.test(r.chamber));
+      const senate = reps.filter(r => /senate|senator|sen\b/.test(r.chamber));
+      const html = [...house, ...senate].map(r => `
+        <div class="card">
+          <div class="name">${escapeHtml(r.name)}</div>
+          <div class="meta">${escapeHtml(r.party)}${r.state ? " • " + escapeHtml(STATE_NAMES[r.state] || r.state) : ""}${r.district ? " • District " + escapeHtml(String(r.district)) : ""}</div>
+          ${r.phone ? `<p class="meta">${escapeHtml(r.phone)}</p>` : ""}
+          ${r.website ? `<a class="link-button" href="${escapeHtml(r.website)}" target="_blank" rel="noopener">Member website ↗</a>` : ""}
+        </div>`).join("");
+      $("zip-result").innerHTML = `<div class="success">Representatives found for ${escapeHtml(zip)}.</div>${html}<div class="notice">ZIP codes can overlap districts. Confirm your exact district with the official House lookup when needed.</div>`;
+    } catch (err) {
+      renderZipWidget(zip, `The in-app lookup could not read the civic API directly. We loaded the official lookup widget instead.`);
+    } finally {
+      $("zip-button").disabled = false;
+    }
+  }
+
+  document.querySelectorAll(".nav-button").forEach(button => button.addEventListener("click", () => showScreen(button.dataset.target)));
+  $("begin-button").addEventListener("click", () => showScreen("screen-today"));
+  $("welcome-location-button").addEventListener("click", () => showScreen("screen-location"));
+  $("back-button").addEventListener("click", () => showScreen("screen-today"));
+  $("view-history-button").addEventListener("click", () => showScreen("screen-history"));
+  $("review-button").addEventListener("click", () => showScreen("screen-today"));
+  $("zip-button").addEventListener("click", lookupZip);
+  $("refresh-data-button").addEventListener("click", async () => { $("refresh-data-button").disabled = true; await fetchRoster(true); renderToday(); renderHistory(); renderCongress(); $("refresh-data-button").disabled = false; });
+  $("clear-history-button").addEventListener("click", () => {
+    if (confirm("Clear all local prayer history on this device?")) {
+      localStorage.removeItem(CONFIG.prayerKey); renderHistory(); renderToday();
+    }
+  });
+  $("member-search").addEventListener("input", renderCongress);
+  $("state-filter").addEventListener("change", renderCongress);
+
+  const savedZip = localStorage.getItem(CONFIG.zipKey);
+  if (savedZip) $("zip-input").value = savedZip;
+
+  // Service worker is optional during local file testing; it activates on HTTPS hosting.
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+
+  fetchRoster().then(() => {
+    renderToday();
+    renderHistory();
+    renderCongress();
+  });
+})();
+</script>
+</body>
+</html>
